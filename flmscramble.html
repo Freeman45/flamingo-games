@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>Flamingo Finance Scramble</title>
+<style>
+:root{
+  --bg:#0f0a1a;--panel:#140e24;--stroke:#2a1e44;--text:#f3e6f7;--muted:#c8a0d8;
+  --key:#ff6bcb;--keyText:#0b0b0b;--good:#cc22aa;--bad:#ff6b6b;--warn:#ffb347;--pillBorder:#2d1f4e;
+}
+*{box-sizing:border-box} html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Inter,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+#wrap{max-width:960px;margin:0 auto;padding:16px}
+.title{display:flex;align-items:center;justify-content:center;gap:10px}
+.logoDot{width:26px;height:26px;border-radius:8px;background:conic-gradient(from 30deg,#ff6bcb,#d400aa,#ff6bcb);box-shadow:0 0 16px rgba(255,107,203,.35)}
+.heading{font-size:24px;font-weight:800;letter-spacing:.04em}
+.sub{color:var(--muted);text-align:center;margin-top:2px}
+
+/* Stats + controls */
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-top:10px;gap:8px;flex-wrap:wrap}
+.pill{border:1px solid var(--stroke);border-radius:999px;padding:6px 10px;color:var(--muted);font-size:12px}
+.controls{display:flex;gap:10px;align-items:center;justify-content:center;margin:8px 0 2px;flex-wrap:wrap}
+.control{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:14px;background:linear-gradient(180deg,#1f0f34,#1b0b22);border:1px solid var(--pillBorder);color:var(--text);font-size:14px;font-weight:600;box-shadow:0 6px 22px rgba(0,0,0,.25),inset 0 0 0 1px rgba(255,255,255,.04)}
+.control:active{transform:translateY(1px)} .control.emph{background:linear-gradient(180deg,#221144,#170d30)}
+
+/* Readout */
+.scramble{font-size:34px;text-align:center;letter-spacing:.2em;margin:12px 0}
+.hint{color:var(--muted);text-align:center;font-size:13px;margin-bottom:6px}
+.typed{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:10px 0;min-height:38px}
+.chip{background:#0b1222;border:1px solid var(--stroke);border-radius:10px;padding:8px 12px;font-weight:700}
+.status{font-size:13px;color:var(--muted);text-align:center}
+.status.good{color:var(--good)}.status.bad{color:var(--bad)}.status.warn{color:var(--warn)}
+
+/* Keyboard */
+.kbWrap{display:flex;justify-content:center}
+.keyboard{width:min(760px,94vw);padding:14px;background:linear-gradient(180deg,#1e0f33,#160b26);border:1px solid #2b1946;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.35),inset 0 -6px 16px rgba(255,255,255,.03)}
+.row{display:flex;gap:8px;justify-content:center}
+.key{background:linear-gradient(180deg,#f026aa,#c5198f);color:var(--keyText);border:none;border-radius:14px;padding:14px 18px;min-width:46px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;box-shadow:0 6px 0 #991174,0 0 0 2px rgba(0,0,0,.07),0 12px 24px rgba(197,25,143,.3)}
+.key:active{transform:translateY(2px);box-shadow:0 4px 0 #7e0e5e,0 0 0 2px rgba(0,0,0,.05)}
+.key.wide{min-width:90px}.row+.row{margin-top:10px}
+.key.space{min-width:260px}
+
+/* Start modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modalInner{background:#0d1324;border:1px solid var(--stroke);border-radius:18px;max-width:560px;width:100%;padding:18px}
+.modal h3{margin:0 0 8px}
+.fileRow{display:flex;gap:8px;align-items:center;margin:8px 0}
+input[type=file]{background:#0b1222;border:1px solid var(--stroke);color:var(--text);border-radius:10px;padding:10px;width:100%}
+
+/* Share card modal */
+.share{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px;z-index:40}
+.share.show{display:flex}
+.sheet{background:#0d1324;border:1px solid var(--stroke);border-radius:16px;max-width:680px;width:100%;padding:16px}
+.sheet .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sheet .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+canvas{max-width:100%;border-radius:12px;border:1px solid var(--stroke)}
+
+/* Floating words stage */
+.floatZone{position:relative;height:55vh;max-width:960px;margin:14px auto 22px;overflow:hidden;border-radius:16px;background:radial-gradient(1200px 500px at 50% 100%,rgba(140,58,140,.1),rgba(0,0,0,0));border:1px solid rgba(68,30,68,.4)}
+.floatWord{position:absolute;bottom:6px;left:0;font-weight:900;letter-spacing:.03em;color:#ffd6f7;text-shadow:0 2px 12px rgba(255,107,203,.25);opacity:.97;white-space:nowrap;animation:floatUp var(--dur,8s) linear forwards}
+@keyframes floatUp{
+ 0%{transform:translateY(0);opacity:.97}
+ 60%{transform:translateY(calc(-0.75 * var(--travel)));opacity:.8}
+ 90%{transform:translateY(calc(-0.98 * var(--travel)));opacity:.4}
+ 100%{transform:translateY(calc(-1.08 * var(--travel)));opacity:0}
+}
+button{cursor:pointer} button:disabled{opacity:.5;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<!-- Start modal -->
+<div class="modal" id="startModal" role="dialog" aria-modal="true">
+  <div class="modalInner">
+    <h3>Welcome to <b>Flamingo Finance Scramble</b></h3>
+    <p style="color:#c8a0d8">Optional: pick a photo now — we'll place it on your share card when you hit milestones.</p>
+    <div class="fileRow"><input id="startPhoto" type="file" accept="image/*"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px">
+      <button type="button" class="control" id="skipPhoto">🚪 Skip Photo</button>
+      <button type="button" class="control emph" id="startPlay">▶ Play</button>
+    </div>
+  </div>
+</div>
+
+<div id="wrap">
+  <div class="title"><div class="logoDot"></div><div class="heading">Flamingo Finance Scramble</div></div>
+  <div class="sub">Unscramble Flamingo Finance terms on a pink QWERTY keyboard</div>
+
+  <div class="topbar">
+    <div class="pill">Correct: <b id="statCorrect">0</b></div>
+    <div class="pill">Streak: <b id="statStreak">0</b></div>
+    <div class="controls">
+      <button type="button" class="control emph" id="btnHint">💡 Hint</button>
+      <button type="button" class="control" id="btnShuffle">🔀 Shuffle</button>
+      <button type="button" class="control" id="btnSkip">⏭️ Skip</button>
+      <button type="button" class="control" id="btnMute">🔊 Sound: On</button>
+      <button type="button" class="control" id="btnReset">♻️ Reset</button>
+    </div>
+  </div>
+
+  <div class="scramble" id="scramble">— — —</div>
+  <div class="hint" id="hint">Tap keys or type on your keyboard.</div>
+  <div class="typed" id="typed"></div>
+  <div class="status" id="status">Ready.</div>
+
+  <div class="kbWrap">
+    <div class="keyboard" id="kb">
+      <!-- NEW: Numbers row -->
+      <div class="row">
+        <button type="button" class="key" data-val="1">1</button>
+        <button type="button" class="key" data-val="2">2</button>
+        <button type="button" class="key" data-val="3">3</button>
+        <button type="button" class="key" data-val="4">4</button>
+        <button type="button" class="key" data-val="5">5</button>
+        <button type="button" class="key" data-val="6">6</button>
+        <button type="button" class="key" data-val="7">7</button>
+        <button type="button" class="key" data-val="8">8</button>
+        <button type="button" class="key" data-val="9">9</button>
+        <button type="button" class="key" data-val="0">0</button>
+        <button type="button" class="key" data-val="-">-</button>
+      </div>
+      <!-- Letters rows -->
+      <div class="row">
+        <button type="button" class="key">q</button><button type="button" class="key">w</button><button type="button" class="key">e</button><button type="button" class="key">r</button><button type="button" class="key">t</button><button type="button" class="key">y</button><button type="button" class="key">u</button><button type="button" class="key">i</button><button type="button" class="key">o</button><button type="button" class="key">p</button>
+      </div>
+      <div class="row">
+        <button type="button" class="key">a</button><button type="button" class="key">s</button><button type="button" class="key">d</button><button type="button" class="key">f</button><button type="button" class="key">g</button><button type="button" class="key">h</button><button type="button" class="key">j</button><button type="button" class="key">k</button><button type="button" class="key">l</button>
+      </div>
+      <div class="row">
+        <button type="button" class="key wide" data-act="back">⌫</button>
+        <button type="button" class="key">z</button><button type="button" class="key">x</button><button type="button" class="key">c</button><button type="button" class="key">v</button><button type="button" class="key">b</button><button type="button" class="key">n</button><button type="button" class="key">m</button>
+        <button type="button" class="key wide" data-act="enter">↵</button>
+      </div>
+      <!-- NEW: Space bar row -->
+      <div class="row">
+        <button type="button" class="key space" data-val=" ">Space</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Floating words area -->
+<div id="floatZone" class="floatZone" aria-hidden="true"></div>
+
+<!-- Share card modal (unchanged UI) -->
+<div class="share" id="cardModal">
+  <div class="sheet">
+    <h3>Share your Flamingo Finance card</h3>
+    <div class="grid">
+      <div>
+        <p style="color:#c8a0d8;margin-top:0">Add/replace photo (optional) before exporting:</p>
+        <input id="userPhoto" type="file" accept="image/*"/>
+        <div class="actions">
+          <button type="button" class="control emph" id="btnRenderCard">Preview Card</button>
+          <button type="button" class="control" id="btnDownloadCard" disabled>Download PNG</button>
+          <button type="button" class="control" id="btnShareCard" disabled>Share</button>
+          <button type="button" class="control" id="btnCloseCard">Close</button>
+        </div>
+      </div>
+      <div><canvas id="cardCanvas" width="960" height="540"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== Data ===== */
+var WORDS=[
+ 'flamingo','finance','flm','neo','gas','swap','vault','perp','fusd','dao',
+ 'wrapper','cross-chain','bridge','poly-network','liquidity','yield','staking',
+ 'mining','governance','tokenomics','flocks','buyback','burn','revenue','fees',
+ 'amm','perpetual','stablecoin','collateral','margin','leverage','synthetic',
+ 'oracle','defi','full-stack','ecosystem','neo-global-development','ngd',
+ 'multichain','interoperability','validator','provider','user','investor',
+ 'portfolio','asset','trading','farming','rewards','emissions','inflation',
+ 'deflation','circulating','supply','market-cap','volume','tvl','apy','apr'
+];
+var FLOAT_WORDS=[
+ 'Full-stack DeFi on Neo','Swap • Vault • Perp • Wrapper','FUSD stablecoin',
+ 'FLM token governance','Cross-chain with Poly Network','Stake in the Vault',
+ 'Provide liquidity pools','Trade perpetual contracts','Mint FUSD with collateral',
+ 'FLM tokenomics evolution','Buyback and burn program','FLOCKS dividend token',
+ 'Neo blockchain ecosystem','GAS for network fees','DAO governance proposals',
+ 'Liquidity mining rewards','Yield farming strategies','Wrapper bridge assets',
+ 'Multi-chain interoperability','Validator incentives','Portfolio management',
+ 'Flamingo Finance ecosystem','DeFi innovation on Neo','Community governance'
+];
+
+/* ===== State ===== */
+var correct=0,streak=0,currentWord='',scrambled='',typed='';
+var muted=false;var userImg=null;var hintsUsed=0;
+
+/* ===== Helpers ===== */
+function $(s){return document.querySelector(s);}
+function displayScramble(w){$("#scramble").textContent=w.toUpperCase().split('').join(' ');}
+function renderTyped(){
+  var box=$("#typed"); box.innerHTML='';
+  var t=typed.toUpperCase(); for(var i=0;i<t.length;i++){var el=document.createElement('div');el.className='chip';el.textContent=t[i]===' ' ? '·' : t[i];box.appendChild(el);}
+}
+function setStatus(m,c){var el=$("#status"); el.className='status '+(c||''); el.textContent=m;}
+function updateStats(){ $("#statCorrect").textContent=correct; $("#statStreak").textContent=streak; }
+function scramble(word){
+  var keep={' ':1,'-':1}; var chars=word.split('');
+  var idx=[]; for(var i=0;i<chars.length;i++){ if(!keep[chars[i]]) idx.push(i); }
+  var pool=idx.map(function(i){return chars[i]});
+  for(var i2=pool.length-1;i2>0;i2--){var j=Math.floor(Math.random()*(i2+1));var tmp=pool[i2];pool[i2]=pool[j];pool[j]=tmp;}
+  for(var k=0;k<idx.length;k++){chars[idx[k]]=pool[k];}
+  return chars.join('');
+}
+
+/* ===== Sound (safe) ===== */
+var audioCtx=null;
+function ensureAudio(){
+  if(muted) return null;
+  if(!audioCtx){
+    var AC=window.AudioContext||window.webkitAudioContext;
+    if(AC){ try{audioCtx=new AC();}catch(e){audioCtx=null;} }
+  }
+  return audioCtx;
+}
+function beep(f,d,type,vol){
+  if(muted) return; var ctx=ensureAudio(); if(!ctx) return;
+  var o=ctx.createOscillator(), g=ctx.createGain();
+  o.type=type||'square'; o.frequency.value=f||600; g.gain.value=vol||0.2;
+  o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+(d||0.06));
+}
+function clickS(){beep(480,0.03,'square',0.12)}
+function okS(){beep(720,0.09,'triangle',0.18); setTimeout(function(){beep(960,0.09,'triangle',0.16)},80)}
+function errS(){beep(180,0.12,'square',0.18)}
+
+/* ===== Game ===== */
+function pickWord(){
+  currentWord = WORDS[Math.floor(Math.random()*WORDS.length)];
+  scrambled = scramble(currentWord);
+  var tries=0; while(scrambled===currentWord && tries++<8){scrambled=scramble(currentWord);}
+  displayScramble(scrambled);
+  $("#hint").textContent='Unscramble the word';
+  typed=''; renderTyped(); setStatus('Type the word…');
+}
+function press(key){
+  if(key==='back'){ if(typed.length){ typed=typed.slice(0,-1); renderTyped(); clickS(); } return; }
+  if(key==='enter'){
+    if(typed.toLowerCase()===currentWord.toLowerCase()){
+      correct++; streak++; updateStats(); okS(); setStatus('Correct! 🎉','good');
+      if(correct>0 && correct%10===0){ openCardModal(); }
+      pickWord();
+    } else { streak=0; updateStats(); errS(); setStatus("Try again, Flamingo fam!",'bad'); }
+    return;
+  }
+  if(typed.length<currentWord.length){ typed+=key; renderTyped(); clickS(); }
+}
+
+/* Buttons: support data-val for space/digits/minus */
+document.addEventListener('click',function(e){
+  var t=e.target;
+  if(t.classList.contains('key')){
+    var act=t.getAttribute('data-act');
+    var val= act ? act : (t.getAttribute('data-val') ? t.getAttribute('data-val') : t.textContent.trim());
+    press(val); return;
+  }
+  if(t.id==='btnShuffle'){scrambled=scramble(scrambled);displayScramble(scrambled);clickS();}
+  if(t.id==='btnSkip'){streak=0;updateStats();setStatus('Skipped.','warn');pickWord();}
+  if(t.id==='btnReset'){correct=0;streak=0;hintsUsed=0;updateStats();setStatus('Reset.');pickWord();}
+  if(t.id==='btnMute'){muted=!muted;$("#btnMute").textContent=muted?'🔇 Sound: Off':'🔊 Sound: On';}
+  if(t.id==='btnHint'){
+    var i=typed.length; if(i>=currentWord.length) return;
+    typed += currentWord[i]; hintsUsed++; renderTyped(); setStatus('Hint used → revealed next letter','warn'); clickS();
+  }
+});
+
+/* Physical keyboard: allow a–z, 0–9, hyphen, and space */
+window.addEventListener('keydown',function(e){
+  var k=(e.key||'');
+  if(k==='Enter'){press('enter'); e.preventDefault(); return;}
+  if(k==='Backspace'){press('back'); e.preventDefault(); return;}
+  if(/^[a-z0-9]$/i.test(k) || k==='-' || k===' '){
+    press(k.toLowerCase());
+  }
+});
+
+/* Start modal + photo */
+var startModal=$("#startModal");
+$("#startPhoto").addEventListener('change',function(e){
+  var f=e.target.files && e.target.files[0]; if(!f) return;
+  var url=URL.createObjectURL(f); var img=new Image(); img.onload=function(){userImg=img;}; img.src=url;
+});
+$("#skipPhoto").addEventListener('click',startGame);
+$("#startPlay").addEventListener('click',startGame);
+function startGame(){ startModal.style.display='none'; pickWord(); startFloatingWords(); }
+
+/* Floating words */
+function rand(min,max){ return Math.random()*(max-min)+min; }
+function startFloatingWords(){
+  var zone=$("#floatZone");
+  function spawn(){
+    var w=document.createElement('div'); w.className='floatWord';
+    w.textContent=FLOAT_WORDS[Math.floor(Math.random()*FLOAT_WORDS.length)];
+    var leftPct=Math.round(rand(6,88));
+    var fontSize=Math.round(rand(18,34));
+    var duration=rand(7.5,11);
+    var travel=zone.clientHeight+80;
+    w.style.left=leftPct+'%'; w.style.fontSize=fontSize+'px';
+    w.style.setProperty('--dur',duration+'s'); w.style.setProperty('--travel',travel+'px');
+    zone.appendChild(w);
+    w.addEventListener('animationend',function(){ if(w && w.parentNode){ w.parentNode.removeChild(w);} });
+    if(zone.children.length>50){ zone.removeChild(zone.firstChild); }
+  }
+  for(var i=0;i<10;i++){ (function(i2){ setTimeout(spawn, i2*200); })(i); }
+  setInterval(spawn,900);
+}
+
+/* Shareable stats card */
+var cardModal=$("#cardModal"), canvas=$("#cardCanvas"), ctx=canvas.getContext('2d');
+$("#userPhoto").addEventListener('change',function(e){
+  var f=e.target.files && e.target.files[0]; if(!f) return;
+  var url=URL.createObjectURL(f); var img=new Image(); img.onload=function(){userImg=img;}; img.src=url;
+});
+$("#btnRenderCard").addEventListener('click',function(){ renderCard(); $("#btnDownloadCard").disabled=false; $("#btnShareCard").disabled=false; clickS(); });
+$("#btnCloseCard").addEventListener('click',function(){ cardModal.classList.remove('show'); clickS(); });
+$("#btnDownloadCard").addEventListener('click',function(){
+  renderCard();
+  var a=document.createElement('a'); a.href=canvas.toDataURL('image/png'); a.download='flamingo-finance-card.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+});
+
+/* Share to X (native share if available, else same-tab X compose) */
+document.getElementById('btnShareCard').addEventListener('click',function(){
+  renderCard();
+  var shareText='I just played Flamingo Finance Scramble!\nSolved: '+correct+' • Streak: '+streak+' • Hints: '+hintsUsed+'\n#FlamingoFinance #DeFi #NeoBlockchain';
+  if(canvas.toBlob){
+    canvas.toBlob(function(blob){
+      var file=new File([blob],'flamingo-finance-card.png',{type:'image/png'});
+      try{
+        if(navigator.canShare && navigator.canShare({files:[file],text:shareText})){
+          navigator.share({files:[file],text:shareText,title:'Flamingo Finance Scramble'}); return;
+        }
+      }catch(e){}
+      var a=document.createElement('a'); a.href=URL.createObjectURL(file); a.download='flamingo-finance-card.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      location.href='https://x.com/intent/tweet?text='+encodeURIComponent(shareText);
+    },'image/png');
+  } else {
+    var dataUrl=canvas.toDataURL('image/png');
+    var a=document.createElement('a'); a.href=dataUrl; a.download='flamingo-finance-card.png'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    location.href='https://x.com/intent/tweet?text='+encodeURIComponent(shareText);
+  }
+});
+
+function openCardModal(){ cardModal.classList.add('show'); renderCard(); $("#btnDownloadCard").disabled=false; $("#btnShareCard").disabled=false; }
+function titleFromHints(n){ if(n===0) return 'DeFi Purist'; if(n<=2) return 'Yield Explorer'; if(n<=5) return 'Liquidity Provider'; return 'Hint Enthusiast'; }
+function renderCard(){
+  var w=canvas.width,h=canvas.height;
+  var g=ctx.createLinearGradient(0,0,w,h); g.addColorStop(0,'#0f0a1a'); g.addColorStop(1,'#1a0f3a'); ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
+  ctx.fillStyle='#f3e6f7'; ctx.font='bold 44px system-ui,Segoe UI,Inter,Arial'; ctx.fillText('Flamingo Finance Scramble',40,80);
+  ctx.fillStyle='#c8a0d8'; ctx.font='20px system-ui,Segoe UI,Inter,Arial'; ctx.fillText('Stats snapshot',40,110);
+  ctx.fillStyle='rgba(255,255,255,0.06)'; roundRect(ctx,40,140,540,220,18,true); ctx.strokeStyle='#2a1e44'; ctx.stroke();
+  ctx.fillStyle='#e06bff'; ctx.font='bold 28px system-ui,Segoe UI,Inter,Arial'; ctx.fillText('Milestone',60,175);
+  ctx.fillStyle='#f3e6f7'; ctx.font='24px system-ui,Segoe UI,Inter,Arial';
+  ctx.fillText('Solved: '+correct+' words',60,215);
+  ctx.fillText('Current streak: '+streak,60,250);
+  ctx.fillText('Hints used: '+hintsUsed,60,285);
+  var title=titleFromHints(hintsUsed); ctx.fillStyle='#ff6bcb'; ctx.font='bold 26px system-ui,Segoe UI,Inter,Arial'; ctx.fillText('Title: '+title,60,325);
+  var cx=750,cy=240,r=110; ctx.save(); ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.closePath(); ctx.clip();
+  ctx.fillStyle='#140e24'; ctx.fillRect(cx-r,cy-r,r*2,r*2);
+  if(userImg){ ctx.drawImage(userImg,cx-r,cy-r,r*2,r*2); }
+  ctx.restore(); ctx.strokeStyle='#ff6bcb'; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke(); ctx.lineWidth=1;
+  drawFlamingoLogo(ctx, w-160, 60, 100, '#ff6bcb');
+  ctx.fillStyle='#c8a0d8'; ctx.font='16px system-ui,Segoe UI,Inter,Arial';
+  var d=new Date().toLocaleString(); ctx.fillText('@FlamingoFinance • '+d, 40, h-30);
+}
+function roundRect(ctx,x,y,w,h,r,fill){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);if(fill)ctx.fill();}
+function drawFlamingoLogo(ctx,x,y,size,color){
+  var s=size; ctx.save(); ctx.translate(x,y); ctx.fillStyle=color;
+  // Simple flamingo shape - abstract representation
+  ctx.beginPath();
+  ctx.moveTo(s*0.2, s*0.8);
+  ctx.bezierCurveTo(s*0.1, s*0.6, s*0.3, s*0.3, s*0.5, s*0.2);
+  ctx.bezierCurveTo(s*0.7, s*0.3, s*0.9, s*0.6, s*0.8, s*0.8);
+  ctx.bezierCurveTo(s*0.7, s*0.9, s*0.3, s*0.9, s*0.2, s*0.8);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Neck/head
+  ctx.beginPath();
+  ctx.moveTo(s*0.5, s*0.2);
+  ctx.bezierCurveTo(s*0.6, s*0.1, s*0.8, s*0.05, s*0.7, s*0.15);
+  ctx.bezierCurveTo(s*0.65, s*0.25, s*0.55, s*0.25, s*0.5, s*0.2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+/* Boot */
+document.addEventListener('DOMContentLoaded',function(){ startModal.style.display='flex'; });
+</script>
+</body>
+</html>
