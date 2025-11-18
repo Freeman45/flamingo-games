@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flamingo Game Hub</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ffcce6, #ff99cc, #ff66b3);
+            color: #8a1a50;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+        
+        .games-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+        }
+        
+        .game-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-align: center;
+            animation: slideUp 0.8s ease-out;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .game-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            color: #ff3399;
+        }
+        
+        .game-title {
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            color: #cc0066;
+        }
+        
+        .game-description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            color: #660033;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(to right, #ff3399, #ff66b3);
+            color: white;
+            padding: 14px 35px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 51, 153, 0.4);
+        }
+        
+        .btn:hover {
+            background: linear-gradient(to right, #ff66b3, #ff3399);
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 51, 153, 0.6);
+        }
+        
+        .flamingo-features {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin: 60px 0;
+        }
+        
+        .feature {
+            text-align: center;
+            max-width: 250px;
+        }
+        
+        .feature i {
+            font-size: 2.5rem;
+            color: #ff3399;
+            margin-bottom: 15px;
+        }
+        
+        .feature h3 {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            color: #cc0066;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            margin-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            color: #8a1a50;
+            font-size: 1.1rem;
+        }
+        
+        .flamingo-animation {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        .flamingo {
+            display: inline-block;
+            font-size: 4rem;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .game-card {
+                padding: 20px;
+            }
+            
+            .game-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">🦩</div>
+            <h1>Flamingo Game Hub</h1>
+            <p class="subtitle">Test your knowledge and skills with our exciting Flamingo.finance games! Challenge yourself with our quiz or test your word skills with our scramble game.</p>
+            
+            <div class="flamingo-animation">
+                <div class="flamingo">🦩</div>
+            </div>
+        </header>
+        
+        <div class="games-container">
+            <div class="game-card">
+                <div class="game-icon">❓</div>
+                <h2 class="game-title">FLM Quiz</h2>
+                <p class="game-description">Test your knowledge about Flamingo.finance with our interactive quiz game. Answer questions about FLM tokens, DeFi concepts, and the Flamingo ecosystem to earn points and climb the leaderboard!</p>
+                <a href="https://freeman45.github.io/flamingo-games/flmquiz.html" class="btn">Play Quiz Game</a>
+            </div>
+            
+            <div class="game-card">
+                <div class="game-icon">🔤</div>
+                <h2 class="game-title">FLM Scramble</h2>
+                <p class="game-description">Unscramble words related to Flamingo.finance, blockchain, and cryptocurrency. Challenge your brain and expand your vocabulary while having fun with our word scramble game!</p>
+                <a href="https://freeman45.github.io/flamingo-games/flmscramble.html" class="btn">Play Scramble Game</a>
+            </div>
+        </div>
+        
+        <div class="flamingo-features">
+            <div class="feature">
+                <i class="fas fa-gamepad"></i>
+                <h3>Fun & Educational</h3>
+                <p>Learn about Flamingo.finance while playing entertaining games</p>
+            </div>
+            
+            <div class="feature">
+                <i class="fas fa-trophy"></i>
+                <h3>Challenge Yourself</h3>
+                <p>Test your knowledge and skills with different game modes</p>
+            </div>
+            
+            <div class="feature">
+                <i class="fas fa-users"></i>
+                <h3>Community Focused</h3>
+                <p>Join the Flamingo.finance community through interactive gaming</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Flamingo Game Hub &copy; 2023 | Powered by Flamingo.finance</p>
+        </footer>
+    </div>
+
+    <script>
+        // Add some interactive elements
+        document.addEventListener('DOMContentLoaded', function() {
+            const gameCards = document.querySelectorAll('.game-card');
+            
+            gameCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.background = 'rgba(255, 255, 255, 0.95)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.background = 'rgba(255, 255, 255, 0.9)';
+                });
+            });
+            
+            // Animate flamingos on page load
+            const flamingos = document.querySelectorAll('.flamingo');
+            flamingos.forEach((flamingo, index) => {
+                flamingo.style.animationDelay = `${index * 0.2}s`;
+            });
+        });
+    </script>
+</body>
+</html>
